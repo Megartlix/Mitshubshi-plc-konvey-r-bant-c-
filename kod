@@ -1,0 +1,47 @@
+Plc buton bant
+
+using System;
+using MELSEC;
+
+class Program
+{
+    static void Main(string[] args)
+    {
+        try
+        {
+            // plc baglantısını burdan yapıyoruz
+            using (MelsecMcNet plc = new MelsecMcNet())
+            {
+                plc.Active = true;
+                plc.IPAddress = "PLC_IP_ADRESI"; // ıp adresini girin
+
+                // butonu kontrol eder
+                bool buttonPressed = ReadButtonStatus(plc, "X1"); // x yazan kısma plc nin giriş kısmını yazınız yani butonu hangi tuşta ise onu atayınız
+
+                // buttona basılı ise
+                if (buttonPressed)
+                {
+                    // Bantı ileri hareket ettir
+                    plc.WriteDevice(BeltForwardAddress, true);
+                    plc.WriteDevice(BeltReverseAddress, false);
+                }
+                else // buton eger basılı degilse
+                {
+                    // bant geri gider
+                    plc.WriteDevice(BeltForwardAddress, false);
+                    plc.WriteDevice(BeltReverseAddress, true);
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("Hata: " + ex.Message);
+        }
+    }
+
+    // buton fonsksiyonu
+    static bool ReadButtonStatus(MelsecMcNet plc, string address)
+    {
+        return plc.ReadDevice(1, address); //bit okuma
+    }
+}
